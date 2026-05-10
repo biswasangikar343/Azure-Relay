@@ -25,15 +25,15 @@ proxy.on('error', (err, req, res) => {
 });
 
 proxy.on('proxyReq', (proxyReq, req) => {
-  console.log(`→ Proxying ${req.method} ${req.url} | Host: ${req.headers.host}`);
+  console.log(`→ PROXYING ${req.method} ${req.url}`);
 });
 
 proxy.on('proxyRes', (proxyRes, req) => {
-  console.log(`← Backend Response: ${proxyRes.statusCode} for ${req.url}`);
+  console.log(`← BACKEND RESPONSE: ${proxyRes.statusCode} for ${req.url}`);
 });
 
 const server = http.createServer((req, res) => {
-  console.log(`Incoming: ${req.method} ${req.url} | Host: ${req.headers.host}`);
+  console.log(`Incoming: ${req.method} ${req.url}`);
 
   if (req.url === '/' || req.url === '') {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -44,7 +44,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.on('upgrade', (req, socket, head) => {
-  console.log(`🔄 WS Upgrade: ${req.url} | Host: ${req.headers.host} | Headers:`, req.headers);
+  console.log(`🔄 WS Upgrade: ${req.url} | Host: ${req.headers.host}`);
   proxy.ws(req, socket, head);
 });
 
