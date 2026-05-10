@@ -3,26 +3,21 @@ const httpProxy = require('http-proxy');
 
 const TARGET_URL = 'https://hetznew1.connect343.net:51616';
 
-const keepAliveAgent = new http.Agent({
-  keepAlive: true,
-  maxSockets: 100,
-  keepAliveMsecs: 3000,
-});
-
 const proxy = httpProxy.createProxyServer({
   target: TARGET_URL,
   changeOrigin: true,
   secure: false,
   xfwd: true,
-  agent: keepAliveAgent,
   proxyTimeout: 0,
   timeout: 0,
+  followRedirects: false,
 });
 
 proxy.on('error', function (err, req, res) {
+  console.error('Proxy Error:', err.message);
   if (res && res.writeHead) {
-    res.writeHead(500, { 'Content-Type': 'text/plain' });
-    res.end('Relay Error.');
+    res.writeHead(502, { 'Content-Type': 'text/plain' });
+    res.end('Relay Error - Target unreachable');
   }
 });
 
