@@ -1,4 +1,5 @@
 const http = require('http');
+const https = require('https');
 const httpProxy = require('http-proxy');
 
 const TARGET_URL = 'https://hetznew1.connect343.net:51616';
@@ -11,6 +12,13 @@ const proxy = httpProxy.createProxyServer({
   proxyTimeout: 0,
   timeout: 0,
   followRedirects: false,
+  
+  // ← این بخش خیلی مهمه (برای https تارگت)
+  agent: new https.Agent({
+    keepAlive: true,
+    maxSockets: 100,
+    rejectUnauthorized: false   // چون secure: false هست
+  })
 });
 
 proxy.on('error', function (err, req, res) {
