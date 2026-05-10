@@ -9,7 +9,7 @@ const proxy = httpProxy.createProxyServer({
   changeOrigin: true,
   secure: false,
   xfwd: true,
-  ws: true,                    // خیلی مهم برای WebSocket
+  ws: true,
   proxyTimeout: 0,
   timeout: 0,
   followRedirects: false,
