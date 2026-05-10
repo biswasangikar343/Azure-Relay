@@ -12,23 +12,25 @@ const proxy = httpProxy.createProxyServer({
   ws: true,
   proxyTimeout: 0,
   timeout: 0,
-
   agent: new https.Agent({
     keepAlive: true,
-    maxSockets: 200,
+    maxSockets: 300,
     rejectUnauthorized: false
   })
 });
 
-proxy.on('error', function (err, req, res) {
-  console.error('Proxy Error:', err.code || err.message);
-  if (res && res.writeHead) {
-    res.writeHead(502, { 'Content-Type': 'text/plain' });
-    res.end('Relay Error - Target unreachable');
-  }
+proxy.on('error', (err, req, res) => {
+  console.error('Proxy Error:', err.code, err.message);
+  if (res?.writeHead) res.writeHead(502).end('Relay Error');
+});
+
+proxy.on('proxyReq', (proxyReq, req) => {
+  console.log(`→ Proxying: ${req.method} ${req.url} | Host: ${req.headers.host}`);
 });
 
 const server = http.createServer((req, res) => {
+  console.log(`Incoming: ${req.method} ${req.url} | Host: ${req.headers.host}`);
+
   if (req.url === '/' || req.url === '') {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('Azure TURBO Relay is Alive!');
@@ -38,6 +40,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.on('upgrade', (req, socket, head) => {
+  console.log(`🔄 WebSocket Upgrade: ${req.url} | Host: ${req.headers.host}`);
   proxy.ws(req, socket, head);
 });
 
