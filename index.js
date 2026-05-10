@@ -10,8 +10,9 @@ const proxy = httpProxy.createProxyServer({
   secure: false,
   xfwd: true,
   ws: true,
-  proxyTimeout: 0,
-  timeout: 0,
+  proxyTimeout: 60000,
+  timeout: 60000,
+
   agent: new https.Agent({
     keepAlive: true,
     maxSockets: 300,
@@ -20,12 +21,15 @@ const proxy = httpProxy.createProxyServer({
 });
 
 proxy.on('error', (err, req, res) => {
-  console.error('Proxy Error:', err.code, err.message);
-  if (res?.writeHead) res.writeHead(502).end('Relay Error');
+  console.error('❌ Proxy Error:', err.code, err.message);
 });
 
 proxy.on('proxyReq', (proxyReq, req) => {
-  console.log(`→ Proxying: ${req.method} ${req.url} | Host: ${req.headers.host}`);
+  console.log(`→ Proxying ${req.method} ${req.url} | Host: ${req.headers.host}`);
+});
+
+proxy.on('proxyRes', (proxyRes, req) => {
+  console.log(`← Backend Response: ${proxyRes.statusCode} for ${req.url}`);
 });
 
 const server = http.createServer((req, res) => {
@@ -40,7 +44,7 @@ const server = http.createServer((req, res) => {
 });
 
 server.on('upgrade', (req, socket, head) => {
-  console.log(`🔄 WebSocket Upgrade: ${req.url} | Host: ${req.headers.host}`);
+  console.log(`🔄 WS Upgrade: ${req.url} | Host: ${req.headers.host} | Headers:`, req.headers);
   proxy.ws(req, socket, head);
 });
 
